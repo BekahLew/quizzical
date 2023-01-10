@@ -9,8 +9,24 @@ function App() {
 	const [questionData, setQuestionData] = useState({})
 	const [questions, setQuestions] = useState([{
 		question: "",
-		allAnswers: []
+		allAnswers: [],
+		selectedAnswer: ""
 	}])
+
+	// Shuffle the answers
+	function shuffleAnswers(array) {
+		let currentIndex = array.length,
+			randomIndex
+
+		while(currentIndex !== 0) {
+			randomIndex = Math.floor(Math.random() * currentIndex)
+			currentIndex--
+
+			[array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]]
+		}
+
+		return array
+	}
 
 	useEffect(() => {
 		async function getQuestions() {
@@ -24,17 +40,15 @@ function App() {
 	function gameStart() {
 		setGameStarted(true)
 		setQuestions(questionData.map(question => ({
-			question: question.question.replace(/&quot;/g,'"'),
-			allAnswers: [...question.incorrect_answers, question.correct_answer]
+			question: question.question,
+			allAnswers: question.incorrect_answers > 1 ? shuffleAnswers([...question.incorrect_answers, question.correct_answer]) : [...question.incorrect_answers, question.correct_answer].sort().reverse(),
+			selectedAnswer: ""
 		})))
 	}
-
-	console.log(questionData)
-	console.log(questions)
     
 	return (
 		<div className="App">
-			{gameStarted ? <Quiz question={questions} restartGame={gameStart}/> : <GameStart gameStart={gameStart}/>}
+			{gameStarted ? <Quiz questions={questions} restartGame={gameStart}/> : <GameStart gameStart={gameStart}/>}
 		</div>
 	);
 }
